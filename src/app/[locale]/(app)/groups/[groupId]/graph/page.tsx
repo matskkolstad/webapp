@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Network, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Network } from "lucide-react";
 
 interface GraphNode {
   data: { id: string; label: string; isLinkedUser: boolean };
@@ -35,26 +34,30 @@ export default function GraphPage() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const fetchGraph = useCallback(async () => {
-    setLoading(true);
-    const searchParams = new URLSearchParams();
-    if (verifiedOnly) searchParams.set("verifiedOnly", "true");
-
-    const res = await fetch(`/api/groups/${groupId}/graph?${searchParams}`);
-    const data = await res.json();
-    setNodes(data.nodes || []);
-    setEdges(data.edges || []);
-    setLoading(false);
-  }, [groupId, verifiedOnly]);
-
   useEffect(() => {
-    fetchGraph();
-  }, [fetchGraph]);
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      const searchParams = new URLSearchParams();
+      if (verifiedOnly) searchParams.set("verifiedOnly", "true");
+
+      const res = await fetch(`/api/groups/${groupId}/graph?${searchParams}`);
+      const data = await res.json();
+      if (!cancelled) {
+        setNodes(data.nodes || []);
+        setEdges(data.edges || []);
+        setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [groupId, verifiedOnly]);
 
   useEffect(() => {
     if (!containerRef.current || nodes.length === 0) return;
 
-    let cy: { destroy: () => void; fit: () => void; zoom: () => number; zoom: (level: number) => void };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let cy: any;
 
     import("cytoscape").then((cytoscapeModule) => {
       const cytoscape = cytoscapeModule.default;

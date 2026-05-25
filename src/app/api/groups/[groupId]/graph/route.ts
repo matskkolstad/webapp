@@ -31,7 +31,8 @@ export async function GET(
   const protectionFilter = searchParams.get("protection");
 
   // Build where clause
-  const whereClause: Record<string, unknown> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const whereClause: any = {
     groupId,
     deletedAt: null,
   };

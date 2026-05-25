@@ -10,7 +10,7 @@ export const registerSchema = z.object({
     .regex(/[0-9]/, "Password must contain a number"),
   displayName: z.string().min(1).max(50).optional(),
   ageConfirmed: z.literal(true, {
-    errorMap: () => ({ message: "You must confirm you are 18+" }),
+    message: "You must confirm you are 18+",
   }),
   locale: z.enum(["nb", "en"]).default("nb"),
 });

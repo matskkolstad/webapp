@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Network, Users, AlertTriangle, Settings, Plus } from "lucide-react";
@@ -13,7 +12,8 @@ export default function GroupPage() {
   const t = useTranslations();
   const params = useParams();
   const groupId = params.groupId as string;
-  const [group, setGroup] = useState<Record<string, unknown> | null>(null);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [group, setGroup] = useState<Record<string, any> | null>(null);
 
   useEffect(() => {
     fetch(`/api/groups/${groupId}`)

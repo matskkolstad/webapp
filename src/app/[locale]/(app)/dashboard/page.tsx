@@ -31,8 +31,19 @@ export default function DashboardPage() {
   const [joinOpen, setJoinOpen] = useState(false);
 
   useEffect(() => {
-    fetchGroups();
-  }, []);
+    async function loadGroups() {
+      try {
+        const res = await fetch("/api/groups");
+        const data = await res.json();
+        setGroups(data.groups || []);
+      } catch {
+        addToast({ title: t("common.error"), variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadGroups();
+  }, [addToast, t]);
 
   async function fetchGroups() {
     try {

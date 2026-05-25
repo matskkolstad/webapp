@@ -39,7 +39,7 @@ export async function createAuditLog(params: {
       action: params.action,
       resource: params.resource,
       resourceId: params.resourceId,
-      metadata: sanitizedMetadata,
+      metadata: sanitizedMetadata as Record<string, string | number | boolean | null> | undefined,
       ipAddress: params.ipAddress,
     },
   });
