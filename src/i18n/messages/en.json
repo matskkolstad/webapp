@@ -1,0 +1,140 @@
+{
+  "common": {
+    "appName": "LiggNett",
+    "tagline": "Who's been with who? 😏",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "search": "Search",
+    "noResults": "No results",
+    "error": "Something went wrong",
+    "success": "Success!",
+    "required": "Required"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Register",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "displayName": "Display name (optional)",
+    "ageConfirmation": "I confirm that I am 18 years or older",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "loginSuccess": "Welcome back! 🎉",
+    "registerSuccess": "Account created! Welcome to LiggNett 🎉",
+    "invalidCredentials": "Invalid email or password",
+    "passwordRequirements": "Minimum 8 characters, at least one uppercase, one lowercase and one number"
+  },
+  "groups": {
+    "title": "My Groups",
+    "create": "Create Group",
+    "join": "Join Group",
+    "name": "Group name",
+    "description": "Description (optional)",
+    "inviteCode": "Invite code",
+    "generateCode": "Generate new code",
+    "copyCode": "Copy code",
+    "members": "Members",
+    "settings": "Settings",
+    "networkVisibility": "Network visibility",
+    "fullVisibility": "Full network visible to all",
+    "limitedVisibility": "Limited visibility",
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
+    },
+    "emptyState": "You're not in any groups yet. Create one or join with an invite code!",
+    "leaveGroup": "Leave group",
+    "deleteGroup": "Delete group",
+    "removeMember": "Remove member"
+  },
+  "persons": {
+    "title": "Persons",
+    "add": "Add person",
+    "alias": "Alias/nickname",
+    "contactToken": "Contact info (optional and voluntary)",
+    "emptyState": "No persons registered yet. Add the first one!",
+    "linkToMe": "Link to my account"
+  },
+  "relationships": {
+    "title": "Relationships",
+    "add": "Add relationship",
+    "between": "between",
+    "and": "and",
+    "date": "Date (optional)",
+    "protection": "Protection",
+    "protected": "Protected",
+    "unprotected": "Unprotected",
+    "unknown": "Unknown",
+    "notes": "Notes (optional)",
+    "verified": "Verified ✓",
+    "unverified": "Unverified",
+    "verify": "Verify relationship",
+    "emptyState": "No relationships registered yet. This is where the fun begins! 😏"
+  },
+  "graph": {
+    "title": "Network Graph",
+    "filters": "Filters",
+    "depth": "Depth",
+    "timeRange": "Time range",
+    "showVerifiedOnly": "Verified only",
+    "showAll": "Show all",
+    "anonymize": "Anonymize",
+    "protectionFilter": "Protection filter",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view",
+    "emptyState": "No data to display yet. Add persons and relationships to see the network! 🕸️"
+  },
+  "alerts": {
+    "title": "Exposure Alerts",
+    "create": "Create Alert",
+    "anonymous": "Anonymous",
+    "identified": "Identified",
+    "message": "Message (optional)",
+    "selectPerson": "Select person",
+    "history": "Alert History",
+    "emptyState": "No alerts. Great! 🎉",
+    "warning": "⚠️ An exposure alert has been sent to relevant persons in your network.",
+    "received": "You have received an exposure alert"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "emptyState": "No new notifications 📭"
+  },
+  "privacy": {
+    "title": "Privacy",
+    "exportData": "Export my data",
+    "deleteAccount": "Delete account",
+    "deleteWarning": "This will permanently delete your account and all associated data. This action cannot be undone.",
+    "consentTitle": "Consent",
+    "consentMessage": "This app handles sensitive personal information. By continuing, you consent to our privacy policy.",
+    "terms": "Terms of Service",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "account": "Account"
+  },
+  "footer": {
+    "madeWith": "Made with ❤️ and a little shame",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  }
+}

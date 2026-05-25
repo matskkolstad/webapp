@@ -1,0 +1,242 @@
+// Prisma schema for LiggNett – relationship network webapp
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── USER & AUTH ────────────────────────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String    @map("password_hash")
+  displayName    String?   @map("display_name")
+  locale         String    @default("nb")
+  ageConfirmed   Boolean   @default(false) @map("age_confirmed")
+  deletedAt      DateTime? @map("deleted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  sessions         Session[]
+  groupMemberships GroupMembership[]
+  personAliases    PersonAlias[]
+  notifications    Notification[]
+  auditLogs        AuditLog[]
+  consentRecords   ConsentRecord[]
+  exposureAlerts   ExposureAlert[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ─── GROUPS ─────────────────────────────────────────────────────────────────────
+
+model Group {
+  id                String    @id @default(uuid())
+  name              String
+  description       String?
+  networkVisibility String    @default("full") @map("network_visibility")
+  deletedAt         DateTime? @map("deleted_at")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  memberships        GroupMembership[]
+  inviteCodes        InviteCode[]
+  personAliases      PersonAlias[]
+  relationshipEvents RelationshipEvent[]
+  exposureAlerts     ExposureAlert[]
+
+  @@map("groups")
+}
+
+model GroupMembership {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  groupId   String    @map("group_id")
+  role      String    @default("member")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([userId])
+  @@index([groupId])
+  @@map("group_memberships")
+}
+
+model InviteCode {
+  id        String    @id @default(uuid())
+  groupId   String    @map("group_id")
+  code      String    @unique
+  expiresAt DateTime  @map("expires_at")
+  maxUses   Int       @default(0) @map("max_uses")
+  uses      Int       @default(0)
+  createdBy String    @map("created_by")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@index([groupId])
+  @@map("invite_codes")
+}
+
+// ─── PERSONS & RELATIONSHIPS ────────────────────────────────────────────────────
+
+model PersonAlias {
+  id           String    @id @default(uuid())
+  groupId      String    @map("group_id")
+  userId       String?   @map("user_id")
+  alias        String
+  contactToken String?   @map("contact_token")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  group                  Group                      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user                   User?                      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  relationshipsAsPersonA RelationshipEvent[]         @relation("PersonA")
+  relationshipsAsPersonB RelationshipEvent[]         @relation("PersonB")
+  verifications          RelationshipVerification[]
+  exposureAlerts         ExposureAlert[]
+
+  @@index([groupId])
+  @@index([userId])
+  @@map("person_aliases")
+}
+
+model RelationshipEvent {
+  id               String    @id @default(uuid())
+  groupId          String    @map("group_id")
+  personAId        String    @map("person_a_id")
+  personBId        String    @map("person_b_id")
+  eventDate        DateTime? @map("event_date")
+  protectionStatus String?   @map("protection_status")
+  notes            String?
+  deletedAt        DateTime? @map("deleted_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  group        Group                      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  personA      PersonAlias                @relation("PersonA", fields: [personAId], references: [id], onDelete: Cascade)
+  personB      PersonAlias                @relation("PersonB", fields: [personBId], references: [id], onDelete: Cascade)
+  verification RelationshipVerification?
+
+  @@index([groupId])
+  @@index([personAId])
+  @@index([personBId])
+  @@map("relationship_events")
+}
+
+model RelationshipVerification {
+  id                  String   @id @default(uuid())
+  relationshipEventId String   @unique @map("relationship_event_id")
+  verifiedByPersonId  String   @map("verified_by_person_id")
+  verifiedAt          DateTime @default(now()) @map("verified_at")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  relationshipEvent RelationshipEvent @relation(fields: [relationshipEventId], references: [id], onDelete: Cascade)
+  verifiedByPerson  PersonAlias       @relation(fields: [verifiedByPersonId], references: [id], onDelete: Cascade)
+
+  @@index([verifiedByPersonId])
+  @@map("relationship_verifications")
+}
+
+// ─── ALERTS & NOTIFICATIONS ────────────────────────────────────────────────────
+
+model ExposureAlert {
+  id            String    @id @default(uuid())
+  groupId       String    @map("group_id")
+  createdById   String    @map("created_by_id")
+  personAliasId String    @map("person_alias_id")
+  isAnonymous   Boolean   @default(true) @map("is_anonymous")
+  message       String?
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  group       Group       @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy   User        @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  personAlias PersonAlias @relation(fields: [personAliasId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([createdById])
+  @@map("exposure_alerts")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  body      String
+  metadata  Json?
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+// ─── GDPR & AUDIT ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  action     String
+  resource   String?
+  resourceId String?  @map("resource_id")
+  metadata   Json?
+  ipAddress  String?  @map("ip_address")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model ConsentRecord {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  consentType String   @map("consent_type")
+  granted     Boolean
+  version     String
+  ipAddress   String?  @map("ip_address")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([consentType])
+  @@map("consent_records")
+}
