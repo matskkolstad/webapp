@@ -2,7 +2,7 @@
 
 ## Overview
 
-LiggNett is a Next.js 15 monolith using the App Router with server-side rendering and API routes.
+LiggNett is a Next.js 16 monolith using the App Router with server-side rendering and API routes.
 
 ## Directory Structure
 

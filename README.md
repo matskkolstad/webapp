@@ -37,7 +37,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 15 (App Router), TypeScript, Tailwind CSS |
+| Frontend | Next.js 16 (App Router), TypeScript, Tailwind CSS |
 | UI | shadcn/ui-style components, Radix UI |
 | Backend | Next.js API Routes, Server Actions |
 | Database | PostgreSQL + Prisma ORM |

@@ -1,3 +1,6 @@
+// NOTE: This rate limiter is in-memory and resets on process restart.
+// It does not apply across multiple server instances/workers.
+// For production, consider backing with a shared store (e.g., Redis).
 const rateMap = new Map<string, { count: number; resetAt: number }>();
 
 export function rateLimit(

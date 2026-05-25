@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { prisma } from "./db";
 import { v4 as uuidv4 } from "uuid";
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("JWT_SECRET environment variable is required in production");
+}
+
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || "dev-secret-change-me"
 );
