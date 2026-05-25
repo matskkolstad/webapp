@@ -1,0 +1,140 @@
+{
+  "common": {
+    "appName": "LiggNett",
+    "tagline": "Hvem kjenner hvem? 😏",
+    "loading": "Laster...",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "confirm": "Bekreft",
+    "back": "Tilbake",
+    "next": "Neste",
+    "close": "Lukk",
+    "search": "Søk",
+    "noResults": "Ingen resultater",
+    "error": "Noe gikk galt",
+    "success": "Suksess!",
+    "required": "Påkrevd"
+  },
+  "auth": {
+    "login": "Logg inn",
+    "register": "Registrer deg",
+    "logout": "Logg ut",
+    "email": "E-post",
+    "password": "Passord",
+    "confirmPassword": "Bekreft passord",
+    "displayName": "Visningsnavn (valgfritt)",
+    "ageConfirmation": "Jeg bekrefter at jeg er 18 år eller eldre",
+    "forgotPassword": "Glemt passord?",
+    "noAccount": "Har du ikke konto?",
+    "hasAccount": "Har du allerede konto?",
+    "loginSuccess": "Velkommen tilbake! 🎉",
+    "registerSuccess": "Konto opprettet! Velkommen til LiggNett 🎉",
+    "invalidCredentials": "Feil e-post eller passord",
+    "passwordRequirements": "Minimum 8 tegn, minst én stor bokstav, én liten bokstav og ett tall"
+  },
+  "groups": {
+    "title": "Mine grupper",
+    "create": "Opprett gruppe",
+    "join": "Bli med i gruppe",
+    "name": "Gruppenavn",
+    "description": "Beskrivelse (valgfritt)",
+    "inviteCode": "Invitasjonskode",
+    "generateCode": "Generer ny kode",
+    "copyCode": "Kopier kode",
+    "members": "Medlemmer",
+    "settings": "Innstillinger",
+    "networkVisibility": "Nettverkssynlighet",
+    "fullVisibility": "Fullt nettverk synlig for alle",
+    "limitedVisibility": "Begrenset synlighet",
+    "roles": {
+      "owner": "Eier",
+      "admin": "Admin",
+      "member": "Medlem"
+    },
+    "emptyState": "Du er ikke med i noen grupper ennå. Opprett en ny eller bli med via invitasjonskode!",
+    "leaveGroup": "Forlat gruppe",
+    "deleteGroup": "Slett gruppe",
+    "removeMember": "Fjern medlem"
+  },
+  "persons": {
+    "title": "Personer",
+    "add": "Legg til person",
+    "alias": "Alias/kallenavn",
+    "contactToken": "Kontaktinfo (valgfritt og frivillig)",
+    "emptyState": "Ingen personer registrert ennå. Legg til den første!",
+    "linkToMe": "Koble til min konto"
+  },
+  "relationships": {
+    "title": "Relasjoner",
+    "add": "Legg til relasjon",
+    "between": "mellom",
+    "and": "og",
+    "date": "Dato (valgfritt)",
+    "protection": "Beskyttelse",
+    "protected": "Beskyttet",
+    "unprotected": "Ubeskyttet",
+    "unknown": "Ukjent",
+    "notes": "Notater (valgfritt)",
+    "verified": "Bekreftet ✓",
+    "unverified": "Ubekreftet",
+    "verify": "Bekreft relasjon",
+    "emptyState": "Ingen relasjoner registrert ennå. Det er her moroa begynner! 😏"
+  },
+  "graph": {
+    "title": "Nettverksgraf",
+    "filters": "Filtre",
+    "depth": "Dybde",
+    "timeRange": "Tidsrom",
+    "showVerifiedOnly": "Kun bekreftede",
+    "showAll": "Vis alle",
+    "anonymize": "Anonymiser",
+    "protectionFilter": "Beskyttelsesfilter",
+    "zoomIn": "Zoom inn",
+    "zoomOut": "Zoom ut",
+    "resetView": "Tilbakestill visning",
+    "emptyState": "Ingen data å vise ennå. Legg til personer og relasjoner for å se nettverket! 🕸️"
+  },
+  "alerts": {
+    "title": "Smittevarsler",
+    "create": "Opprett varsel",
+    "anonymous": "Anonym",
+    "identified": "Identifisert",
+    "message": "Melding (valgfritt)",
+    "selectPerson": "Velg person",
+    "history": "Varslingshistorikk",
+    "emptyState": "Ingen varsler. Bra! 🎉",
+    "warning": "⚠️ Et smittevarsel har blitt sendt til relevante personer i nettverket ditt.",
+    "received": "Du har mottatt et smittevarsel"
+  },
+  "notifications": {
+    "title": "Varsler",
+    "markRead": "Marker som lest",
+    "markAllRead": "Marker alle som lest",
+    "emptyState": "Ingen nye varsler 📭"
+  },
+  "privacy": {
+    "title": "Personvern",
+    "exportData": "Eksporter mine data",
+    "deleteAccount": "Slett konto",
+    "deleteWarning": "Dette vil permanent slette kontoen din og alle tilhørende data. Denne handlingen kan ikke angres.",
+    "consentTitle": "Samtykke",
+    "consentMessage": "Denne appen håndterer sensitive personopplysninger. Ved å fortsette samtykker du til vår personvernerklæring.",
+    "terms": "Vilkår for bruk",
+    "privacyPolicy": "Personvernerklæring"
+  },
+  "settings": {
+    "title": "Innstillinger",
+    "language": "Språk",
+    "theme": "Tema",
+    "darkMode": "Mørk modus",
+    "lightMode": "Lys modus",
+    "account": "Konto"
+  },
+  "footer": {
+    "madeWith": "Laget med ❤️ og litt skam",
+    "privacy": "Personvern",
+    "terms": "Vilkår"
+  }
+}
