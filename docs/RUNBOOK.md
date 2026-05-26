@@ -47,6 +47,13 @@ cd /home/liggnett/app && node -e "console.log('Node OK')"
 npx prisma migrate status
 ```
 
+### ExecStartPre permission error (standalone/public)
+If systemd reports `rm: cannot remove .../.next/standalone/public: Permission denied`:
+```bash
+sudo chown -R liggnett:liggnett /home/liggnett/app/.next/standalone
+sudo systemctl restart liggnett
+```
+
 ### Database connection failed
 ```bash
 sudo systemctl status postgresql

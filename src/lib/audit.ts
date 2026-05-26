@@ -7,6 +7,8 @@ export type AuditAction =
   | "create_relationship"
   | "delete_relationship"
   | "verify_relationship"
+  | "confirm_relationship"
+  | "unconfirm_relationship"
   | "create_alert"
   | "create_group"
   | "join_group"

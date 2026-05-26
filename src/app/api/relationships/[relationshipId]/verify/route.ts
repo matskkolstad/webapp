@@ -44,21 +44,26 @@ export async function POST(
   }
 
   // Check if already verified
-  const existingVerification = await prisma.relationshipVerification.findUnique({
-    where: { relationshipEventId: relationshipId },
+  const existingConfirmation = await prisma.relationshipConfirmation.findUnique({
+    where: {
+      relationshipEventId_personAliasId: {
+        relationshipEventId: relationshipId,
+        personAliasId: userPersonAlias.id,
+      },
+    },
   });
 
-  if (existingVerification) {
+  if (existingConfirmation) {
     return NextResponse.json(
-      { error: "Relationship already verified" },
+      { error: "Relationship already confirmed" },
       { status: 409 }
     );
   }
 
-  const verification = await prisma.relationshipVerification.create({
+  const confirmation = await prisma.relationshipConfirmation.create({
     data: {
       relationshipEventId: relationshipId,
-      verifiedByPersonId: userPersonAlias.id,
+      personAliasId: userPersonAlias.id,
     },
   });
 
@@ -70,5 +75,5 @@ export async function POST(
     ipAddress: request.headers.get("x-forwarded-for") || "unknown",
   });
 
-  return NextResponse.json({ verification }, { status: 201 });
+  return NextResponse.json({ confirmation }, { status: 201 });
 }

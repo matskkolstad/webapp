@@ -17,6 +17,11 @@ npm run test:e2e
 
 # Coverage
 npm run test:coverage
+
+# Build + runtime sanity
+npm run build
+sudo systemctl restart liggnett
+sudo systemctl status liggnett --no-pager
 ```
 
 ## Coverage Goals

@@ -53,11 +53,14 @@ Open [http://localhost:3000](http://localhost:3000).
 - 👥 **Groups** – Create/join groups, invite codes (7-day expiry), role management
 - 🧑‍🤝‍🧑 **Person Aliases** – Privacy-first aliases, optional contact tokens
 - 💕 **Relationships** – Log relationships with optional metadata, verification
+- ✅ **Relationship Confirmations** – Per-person confirmations, status (unverified/pending/verified)
 - 🕸️ **Network Graph** – Interactive Cytoscape.js visualization with filters
-- ⚠️ **Exposure Alerts** – Anonymous or identified alerts with network-based notification
+- ⚠️ **Exposure Alerts** – Anonymous or identified alerts, admin notify-all, alert history
+- 🔔 **Notifications** – In-app notifications with unread count and details view
 - 🔒 **GDPR/Privacy** – Data export, account deletion, audit logging, consent tracking
 - 🌐 **i18n** – Full Norwegian (bokmål) and English support
 - 🌙 **Dark/Light Mode** – Theme support
+- 📱 **Mobile + PWA** – “Add to Home Screen” support for iOS
 
 ## Documentation
 

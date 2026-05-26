@@ -7,6 +7,13 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") || "unknown";
+  const forwardedProto = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim();
+  const isHttps =
+    forwardedProto === "https" || request.nextUrl.protocol === "https:";
+  const secureCookie = process.env.NODE_ENV === "production" ? isHttps : false;
 
   const { success } = rateLimit(`login:${ip}`, 10, 60000);
   if (!success) {
@@ -65,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set("session", jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: secureCookie,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60,
       path: "/",

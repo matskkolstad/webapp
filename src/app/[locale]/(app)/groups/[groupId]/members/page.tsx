@@ -1,66 +1,88 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/toast";
-import { Plus, UserCircle } from "lucide-react";
+import { ArrowLeft, UserCircle } from "lucide-react";
 
-interface Person {
-  id: string;
-  alias: string;
-  contactToken: string | null;
-  userId: string | null;
+interface Member {
+  userId: string;
+  role: string;
   createdAt: string;
+  user: { id: string; displayName: string | null; email: string };
 }
 
 export default function MembersPage() {
   const t = useTranslations();
   const params = useParams();
   const groupId = params.groupId as string;
+  const router = useRouter();
   const { addToast } = useToast();
-  const [persons, setPersons] = useState<Person[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/groups/${groupId}/persons`)
-      .then((r) => r.json())
-      .then((d) => {
-        setPersons(d.persons || []);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch(`/api/groups/${groupId}/members`).then((r) => r.json()),
+      fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)),
+      fetch(`/api/groups/${groupId}`).then((r) => r.json()),
+    ]).then(([membersData, meData, groupData]) => {
+      setMembers(membersData?.members || []);
+      setCurrentUserId(meData?.user?.id ?? null);
+      setIsAdmin(["admin", "owner"].includes(groupData?.group?.currentUserRole));
+      setLoading(false);
+    });
   }, [groupId]);
 
-  async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
+  async function refreshMembers() {
+    const data = await fetch(`/api/groups/${groupId}/members`).then((r) => r.json());
+    setMembers(data.members || []);
+  }
 
+  async function handleRoleChange(userId: string, role: "admin" | "member") {
     try {
-      const res = await fetch(`/api/groups/${groupId}/persons`, {
-        method: "POST",
+      const res = await fetch(`/api/groups/${groupId}/members`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          alias: formData.get("alias"),
-          contactToken: formData.get("contactToken") || undefined,
-        }),
+        body: JSON.stringify({ userId, role }),
       });
 
       if (!res.ok) {
-        addToast({ title: t("common.error"), variant: "destructive" });
+        const data = await res.json();
+        addToast({ title: data.error || t("common.error"), variant: "destructive" });
         return;
       }
 
       addToast({ title: t("common.success"), variant: "success" });
-      setDialogOpen(false);
-      const data = await fetch(`/api/groups/${groupId}/persons`).then((r) => r.json());
-      setPersons(data.persons || []);
+      await refreshMembers();
+    } catch {
+      addToast({ title: t("common.error"), variant: "destructive" });
+    }
+  }
+
+  async function handleRemove(userId: string) {
+    if (!confirm(t("groups.confirmRemoveMember"))) return;
+    try {
+      const res = await fetch(`/api/groups/${groupId}/members`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        addToast({ title: data.error || t("common.error"), variant: "destructive" });
+        return;
+      }
+
+      addToast({ title: t("common.success"), variant: "success" });
+      await refreshMembers();
     } catch {
       addToast({ title: t("common.error"), variant: "destructive" });
     }
@@ -71,57 +93,64 @@ export default function MembersPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{t("persons.title")}</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("persons.add")}
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("persons.add")}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleAdd} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="alias">{t("persons.alias")}</Label>
-                <Input id="alias" name="alias" required maxLength={50} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="contactToken">{t("persons.contactToken")}</Label>
-                <Input id="contactToken" name="contactToken" maxLength={200} />
-              </div>
-              <Button type="submit" className="w-full">{t("persons.add")}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="icon" onClick={() => router.back()} aria-label={t("common.back")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h1 className="text-3xl font-bold">{t("groups.members")}</h1>
+        </div>
       </div>
 
-      {persons.length === 0 ? (
+      {members.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <UserCircle className="mx-auto mb-4 h-12 w-12 text-[var(--muted-foreground)]" />
-            <p className="text-[var(--muted-foreground)]">{t("persons.emptyState")}</p>
+            <p className="text-[var(--muted-foreground)]">{t("groups.noMembers")}</p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {persons.map((person) => (
-            <Card key={person.id}>
-              <CardContent className="flex items-center gap-3 py-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary)] text-sm font-bold text-[var(--primary-foreground)]">
-                  {person.alias[0].toUpperCase()}
-                </div>
-                <div>
-                  <p className="font-medium">{person.alias}</p>
-                  {person.userId && (
-                    <Badge variant="outline" className="text-xs">{t("persons.linkToMe")}</Badge>
+          {members.map((member) => {
+            const isSelf = member.userId === currentUserId;
+            const displayName = member.user.displayName || member.user.email;
+            const showOwnerAdmin = member.role === "owner";
+            const showAdmin = member.role === "admin" || member.role === "owner";
+            return (
+              <Card key={member.userId}>
+                <CardContent className="flex items-center justify-between gap-3 py-4">
+                  <div>
+                    <p className="font-medium">{displayName}</p>
+                    <p className="text-sm text-[var(--muted-foreground)]">{member.user.email}</p>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      <Badge variant="secondary">{t("groups.roles.member")}</Badge>
+                      {showAdmin && (
+                        <Badge variant="default">{t("groups.roles.admin")}</Badge>
+                      )}
+                      {showOwnerAdmin && (
+                        <Badge variant="outline">{t("groups.roles.owner")}</Badge>
+                      )}
+                    </div>
+                  </div>
+                  {isAdmin && !isSelf && (
+                    <div className="flex flex-col gap-2">
+                      {member.role === "member" ? (
+                        <Button size="sm" onClick={() => handleRoleChange(member.userId, "admin")}>
+                          {t("groups.makeAdmin")}
+                        </Button>
+                      ) : member.role === "admin" ? (
+                        <Button size="sm" variant="outline" onClick={() => handleRoleChange(member.userId, "member")}>
+                          {t("groups.removeAdmin")}
+                        </Button>
+                      ) : null}
+                      <Button size="sm" variant="destructive" onClick={() => handleRemove(member.userId)}>
+                        {t("groups.removeMember")}
+                      </Button>
+                    </div>
                   )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>

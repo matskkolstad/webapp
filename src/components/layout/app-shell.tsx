@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { PageTransition } from "@/components/layout/page-transition";
 import {
   Bell,
   Settings,
@@ -27,6 +28,7 @@ export function AppShell({ user, children }: AppShellProps) {
   const t = useTranslations();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const navItems = [
     { href: "/dashboard", label: t("groups.title"), icon: Home },
@@ -38,6 +40,35 @@ export function AppShell({ user, children }: AppShellProps) {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/";
   }
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadUnreadCount = async () => {
+      const res = await fetch("/api/notifications");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (!cancelled) {
+        setUnreadCount(data.unreadCount || 0);
+      }
+    };
+
+    loadUnreadCount();
+
+    const handleCountUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<number>;
+      if (typeof customEvent.detail === "number") {
+        setUnreadCount(customEvent.detail);
+      }
+    };
+
+    window.addEventListener("notifications-count", handleCountUpdate);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("notifications-count", handleCountUpdate);
+    };
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen">
@@ -58,7 +89,7 @@ export function AppShell({ user, children }: AppShellProps) {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-[var(--primary)]">🔗 {t("common.appName")}</span>
+              <img src="/logo.svg" alt={t("common.appName")} className="h-7" />
             </Link>
           </div>
 
@@ -70,7 +101,7 @@ export function AppShell({ user, children }: AppShellProps) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors lg:py-2 ${
                     isActive
                       ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
                       : "text-[var(--muted-foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
@@ -78,7 +109,12 @@ export function AppShell({ user, children }: AppShellProps) {
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Icon className="h-4 w-4" />
-                  {item.label}
+                  <span className="flex-1">{item.label}</span>
+                  {item.href === "/notifications" && unreadCount > 0 && (
+                    <span className="rounded-full bg-red-500 px-2 py-0.5 text-xs font-semibold text-white">
+                      {unreadCount}
+                    </span>
+                  )}
                 </Link>
               );
             })}
@@ -111,8 +147,8 @@ export function AppShell({ user, children }: AppShellProps) {
 
       {/* Main content */}
       <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-6xl px-4 py-8 lg:px-8">
-          {children}
+        <div className="container mx-auto max-w-6xl px-4 pb-8 pt-16 lg:px-8 lg:pt-8">
+          <PageTransition routeKey={pathname}>{children}</PageTransition>
         </div>
       </main>
     </div>

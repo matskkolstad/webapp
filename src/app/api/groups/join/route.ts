@@ -52,24 +52,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await prisma.$transaction([
-      existingMembership
-        ? prisma.groupMembership.update({
-            where: { id: existingMembership.id },
-            data: { deletedAt: null, role: "member" },
-          })
-        : prisma.groupMembership.create({
-            data: {
-              userId: user.id,
-              groupId: invite.groupId,
-              role: "member",
-            },
-          }),
-      prisma.inviteCode.update({
+    const preferredAlias = user.displayName?.trim() || user.email;
+
+    await prisma.$transaction(async (tx) => {
+      if (existingMembership) {
+        await tx.groupMembership.update({
+          where: { id: existingMembership.id },
+          data: { deletedAt: null, role: "member" },
+        });
+      } else {
+        await tx.groupMembership.create({
+          data: {
+            userId: user.id,
+            groupId: invite.groupId,
+            role: "member",
+          },
+        });
+      }
+
+      await tx.inviteCode.update({
         where: { id: invite.id },
         data: { uses: { increment: 1 } },
-      }),
-    ]);
+      });
+
+      const existingPerson = await tx.personAlias.findFirst({
+        where: { groupId: invite.groupId, userId: user.id },
+        select: { id: true, deletedAt: true },
+      });
+
+      if (existingPerson) {
+        await tx.personAlias.update({
+          where: { id: existingPerson.id },
+          data: { deletedAt: null, alias: preferredAlias },
+        });
+      } else {
+        await tx.personAlias.create({
+          data: {
+            groupId: invite.groupId,
+            userId: user.id,
+            alias: preferredAlias,
+          },
+        });
+      }
+    });
 
     await createAuditLog({
       userId: user.id,

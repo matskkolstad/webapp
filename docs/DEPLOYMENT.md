@@ -44,6 +44,9 @@ cp .env.example .env
 
 npx prisma migrate deploy
 npm run build
+
+# Prepare standalone output (sync public + static assets)
+bash scripts/prepare-standalone.sh
 ```
 
 ## 4. systemd Service
@@ -63,6 +66,7 @@ Environment=NODE_ENV=production
 Environment=PORT=3000
 EnvironmentFile=/home/liggnett/app/.env
 ExecStart=/usr/bin/node /home/liggnett/app/.next/standalone/server.js
+ExecStartPre=/usr/bin/bash /home/liggnett/app/scripts/prepare-standalone.sh
 Restart=on-failure
 RestartSec=10
 StandardOutput=journal
@@ -73,7 +77,7 @@ SyslogIdentifier=liggnett
 NoNewPrivileges=true
 ProtectSystem=strict
 ProtectHome=read-only
-ReadWritePaths=/home/liggnett/app/.next/cache
+ReadWritePaths=/home/liggnett/app/.next/cache /home/liggnett/app/.next/standalone
 
 [Install]
 WantedBy=multi-user.target

@@ -76,7 +76,7 @@ export async function POST(
     const person = await prisma.personAlias.create({
       data: {
         groupId,
-        userId: user.id,
+        userId: null,
         alias: parsed.data.alias,
         contactToken: parsed.data.contactToken,
       },

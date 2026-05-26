@@ -1,24 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
-import { Copy, Key } from "lucide-react";
+import { ArrowLeft, Copy, Key } from "lucide-react";
 
 export default function GroupSettingsPage() {
   const t = useTranslations();
   const params = useParams();
+  const router = useRouter();
   const groupId = params.groupId as string;
+  const locale = params.locale as string;
   const { addToast } = useToast();
   const [invites, setInvites] = useState<Array<{ id: string; code: string; expiresAt: string; uses: number }>>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/groups/${groupId}/invite`)
-      .then((r) => r.json())
-      .then((d) => setInvites(d.invites || []))
+    Promise.all([
+      fetch(`/api/groups/${groupId}/invite`).then((r) => r.json()),
+      fetch(`/api/groups/${groupId}`).then((r) => r.json()),
+    ])
+      .then(([inviteData, groupData]) => {
+        setInvites(inviteData.invites || []);
+        setIsAdmin(["admin", "owner"].includes(groupData?.group?.currentUserRole));
+      })
       .catch(() => {});
   }, [groupId]);
 
@@ -42,9 +50,46 @@ export default function GroupSettingsPage() {
     addToast({ title: "Kopiert!", variant: "success" });
   }
 
+  async function handleDeleteGroup() {
+    if (!confirm(t("groups.confirmDelete"))) return;
+    try {
+      const res = await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        addToast({ title: data.error || t("common.error"), variant: "destructive" });
+        return;
+      }
+      addToast({ title: t("common.success"), variant: "success" });
+      router.push(`/${locale}/dashboard`);
+    } catch {
+      addToast({ title: t("common.error"), variant: "destructive" });
+    }
+  }
+
+  async function handleLeaveGroup() {
+    if (!confirm(t("groups.confirmLeave"))) return;
+    try {
+      const res = await fetch(`/api/groups/${groupId}/leave`, { method: "POST" });
+      if (!res.ok) {
+        const data = await res.json();
+        addToast({ title: data.error || t("common.error"), variant: "destructive" });
+        return;
+      }
+      addToast({ title: t("common.success"), variant: "success" });
+      router.push(`/${locale}/dashboard`);
+    } catch {
+      addToast({ title: t("common.error"), variant: "destructive" });
+    }
+  }
+
   return (
     <div>
-      <h1 className="mb-6 text-3xl font-bold">{t("groups.settings")}</h1>
+      <div className="mb-6 flex items-center gap-3">
+        <Button variant="outline" size="icon" onClick={() => router.back()} aria-label={t("common.back")}>
+          <ArrowLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="text-3xl font-bold">{t("groups.settings")}</h1>
+      </div>
 
       <Card className="mb-6">
         <CardHeader>
@@ -79,6 +124,30 @@ export default function GroupSettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>{t("groups.leaveGroup")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" onClick={handleLeaveGroup}>
+            {t("groups.leaveGroup")}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("groups.adminActions")}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button variant="destructive" onClick={handleDeleteGroup}>
+              {t("groups.deleteGroup")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

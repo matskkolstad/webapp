@@ -47,6 +47,7 @@ export const createAlertSchema = z.object({
   personAliasId: z.string().uuid(),
   isAnonymous: z.boolean().default(true),
   message: z.string().max(1000).optional(),
+  notifyAll: z.boolean().optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

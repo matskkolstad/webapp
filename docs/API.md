@@ -36,6 +36,9 @@ Get group details (requires membership).
 Join a group via invite code.
 - Body: `{ code }`
 
+### POST /api/groups/:groupId/leave
+Leave a group (cannot leave if last admin).
+
 ### POST /api/groups/:groupId/invite
 Generate invite code (owner/admin only).
 
@@ -51,6 +54,12 @@ List persons in group.
 Add a person alias.
 - Body: `{ alias, contactToken? }`
 
+### POST /api/groups/:groupId/persons/:personId/link
+Link current user to a person alias (with merge rules).
+
+### POST /api/groups/:groupId/persons/:personId/unlink
+Unlink current user from a person alias.
+
 ## Relationships
 
 ### GET /api/groups/:groupId/relationships
@@ -63,6 +72,12 @@ Create a relationship event.
 ### POST /api/relationships/:relationshipId/verify
 Verify a relationship (must be linked to one of the persons).
 
+### POST /api/relationships/:relationshipId/confirm
+Confirm a relationship (per-person confirmation).
+
+### POST /api/relationships/:relationshipId/unconfirm
+Unconfirm a relationship (admin only).
+
 ### GET /api/groups/:groupId/graph
 Get graph data (nodes + edges) for visualization.
 - Query: `verifiedOnly?, from?, to?, protection?`
@@ -71,7 +86,10 @@ Get graph data (nodes + edges) for visualization.
 
 ### POST /api/alerts
 Create an exposure alert.
-- Body: `{ personAliasId, isAnonymous?, message? }`
+- Body: `{ personAliasId, isAnonymous?, message?, notifyAll? }`
+
+### GET /api/groups/:groupId/alerts
+List exposure alerts visible to the user (1-year retention).
 
 ## Notifications
 
@@ -89,3 +107,17 @@ Download all user data as JSON.
 
 ### POST /api/privacy/delete
 Soft-delete user account.
+
+### GET /api/privacy/delete-options
+List groups with linked persons for delete choices.
+
+## Members
+
+### GET /api/groups/:groupId/members
+List group members.
+
+### PATCH /api/groups/:groupId/members
+Update member role (admin/owner only).
+
+### DELETE /api/groups/:groupId/members
+Remove member (admin/owner only).

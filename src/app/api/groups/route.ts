@@ -56,18 +56,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const group = await prisma.group.create({
-      data: {
-        name: parsed.data.name,
-        description: parsed.data.description,
-        networkVisibility: parsed.data.networkVisibility,
-        memberships: {
-          create: {
-            userId: user.id,
-            role: "owner",
+    const preferredAlias = user.displayName?.trim() || user.email;
+
+    const group = await prisma.$transaction(async (tx) => {
+      const createdGroup = await tx.group.create({
+        data: {
+          name: parsed.data.name,
+          description: parsed.data.description,
+          networkVisibility: parsed.data.networkVisibility,
+          memberships: {
+            create: {
+              userId: user.id,
+              role: "admin",
+            },
           },
         },
-      },
+      });
+
+      await tx.personAlias.create({
+        data: {
+          groupId: createdGroup.id,
+          userId: user.id,
+          alias: preferredAlias,
+        },
+      });
+
+      return createdGroup;
     });
 
     await createAuditLog({

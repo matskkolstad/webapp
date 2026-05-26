@@ -115,12 +115,12 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold">{t("groups.title")}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Dialog open={joinOpen} onOpenChange={setJoinOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline">{t("groups.join")}</Button>
+              <Button variant="outline" className="w-full sm:w-auto">{t("groups.join")}</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -138,7 +138,7 @@ export default function DashboardPage() {
 
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("groups.create")}
               </Button>
@@ -171,7 +171,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {groups.map((group) => (
             <Link key={group.id} href={`/groups/${group.id}`}>
               <Card className="cursor-pointer transition-shadow hover:shadow-lg">

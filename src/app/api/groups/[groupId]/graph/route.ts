@@ -38,7 +38,7 @@ export async function GET(
   };
 
   if (verifiedOnly) {
-    whereClause.verification = { isNot: null };
+    // Filter after computing status to ensure fully verified (2 confirmations)
   }
 
   if (fromDate || toDate) {
@@ -61,7 +61,7 @@ export async function GET(
       include: {
         personA: { select: { id: true, alias: true } },
         personB: { select: { id: true, alias: true } },
-        verification: true,
+        confirmations: { select: { personAliasId: true } },
       },
     }),
   ]);
@@ -75,16 +75,29 @@ export async function GET(
     },
   }));
 
-  const edges = relationships.map((r) => ({
-    data: {
-      id: r.id,
-      source: r.personAId,
-      target: r.personBId,
-      verified: !!r.verification,
-      protectionStatus: r.protectionStatus,
-      eventDate: r.eventDate?.toISOString(),
-    },
-  }));
+  let edges = relationships.map((r) => {
+    const confirmationsCount = r.confirmations.length;
+    const status = confirmationsCount >= 2
+      ? "verified"
+      : confirmationsCount === 1
+        ? "pending"
+        : "unverified";
+
+    return {
+      data: {
+        id: r.id,
+        source: r.personAId,
+        target: r.personBId,
+        status,
+        protectionStatus: r.protectionStatus,
+        eventDate: r.eventDate?.toISOString(),
+      },
+    };
+  });
+
+  if (verifiedOnly) {
+    edges = edges.filter((edge) => edge.data.status === "verified");
+  }
 
   return NextResponse.json({ nodes, edges });
 }

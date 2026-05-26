@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Network, Users, AlertTriangle, Settings, Plus } from "lucide-react";
+import { Network, Users, AlertTriangle, Settings, Plus, UserCircle } from "lucide-react";
 
 export default function GroupPage() {
   const t = useTranslations();
@@ -39,11 +39,18 @@ export default function GroupPage() {
       color: "text-pink-500",
     },
     {
+      href: `/groups/${groupId}/persons`,
+      icon: UserCircle,
+      title: t("groups.persons"),
+      description: `${(group._count as Record<string, number>)?.personAliases || 0} ${t("groups.personCountLabel")}`,
+      color: "text-blue-500",
+    },
+    {
       href: `/groups/${groupId}/members`,
       icon: Users,
       title: t("groups.members"),
-      description: `${(group._count as Record<string, number>)?.personAliases || 0} personer`,
-      color: "text-blue-500",
+      description: `${(group._count as Record<string, number>)?.memberships || 0} ${t("groups.memberCountLabel")}`,
+      color: "text-emerald-500",
     },
     {
       href: `/groups/${groupId}/alerts`,

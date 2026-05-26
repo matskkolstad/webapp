@@ -7,6 +7,13 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") || "unknown";
+  const forwardedProto = request.headers
+    .get("x-forwarded-proto")
+    ?.split(",")[0]
+    ?.trim();
+  const isHttps =
+    forwardedProto === "https" || request.nextUrl.protocol === "https:";
+  const secureCookie = process.env.NODE_ENV === "production" ? isHttps : false;
 
   const { success } = rateLimit(`register:${ip}`, 5, 60000);
   if (!success) {
@@ -30,11 +37,62 @@ export async function POST(request: NextRequest) {
     const { email, password, displayName, ageConfirmed, locale } = parsed.data;
 
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
+    if (existing && !existing.deletedAt) {
       return NextResponse.json(
         { error: "An account with this email already exists" },
         { status: 409 }
       );
+    }
+
+    if (existing && existing.deletedAt) {
+      const restoredUser = await prisma.user.update({
+        where: { id: existing.id },
+        data: {
+          passwordHash: await hashPassword(password),
+          displayName,
+          ageConfirmed,
+          locale,
+          deletedAt: null,
+        },
+      });
+
+      await prisma.session.deleteMany({ where: { userId: restoredUser.id } });
+
+      const jwt = await createSession(
+        restoredUser.id,
+        ip,
+        request.headers.get("user-agent") || undefined
+      );
+
+      await createAuditLog({
+        userId: restoredUser.id,
+        action: "register",
+        resource: "user",
+        resourceId: restoredUser.id,
+        ipAddress: ip,
+      });
+
+      const response = NextResponse.json(
+        {
+          user: {
+            id: restoredUser.id,
+            email: restoredUser.email,
+            displayName: restoredUser.displayName,
+            locale: restoredUser.locale,
+          },
+        },
+        { status: 201 }
+      );
+
+      response.cookies.set("session", jwt, {
+        httpOnly: true,
+        secure: secureCookie,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60,
+        path: "/",
+      });
+
+      return response;
     }
 
     const passwordHash = await hashPassword(password);
@@ -88,7 +146,7 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set("session", jwt, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: secureCookie,
       sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60,
       path: "/",
