@@ -58,6 +58,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/cytoscape": "^3.21.9",
     "@types/node": "^20",
