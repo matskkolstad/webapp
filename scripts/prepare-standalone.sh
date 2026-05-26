@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/home/liggnett/app"
-STANDALONE_DIR="$APP_DIR/.next/standalone"
+DEFAULT_APP_DIR="/home/liggnett/app"
+if [[ -d "$DEFAULT_APP_DIR" ]]; then
+	APP_DIR="$DEFAULT_APP_DIR"
+else
+	APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+fi
+STANDALONE_DIR="${STANDALONE_DIR:-$APP_DIR/.next/standalone}"
 
 mkdir -p "$STANDALONE_DIR/.next"
 
@@ -14,5 +19,9 @@ cp -a "$APP_DIR/.next/static" "$STANDALONE_DIR/.next/"
 rm -rf "$STANDALONE_DIR/public"
 cp -a "$APP_DIR/public" "$STANDALONE_DIR/"
 
-# Ensure ownership
-chown -R liggnett:liggnett "$STANDALONE_DIR/.next" "$STANDALONE_DIR/public"
+# Ensure ownership (skip in CI or when user does not exist)
+if command -v getent >/dev/null 2>&1 && getent passwd liggnett >/dev/null 2>&1; then
+	if [[ "$(id -u)" == "0" ]]; then
+		chown -R liggnett:liggnett "$STANDALONE_DIR/.next" "$STANDALONE_DIR/public"
+	fi
+fi
