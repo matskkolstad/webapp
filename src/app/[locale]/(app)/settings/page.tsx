@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,21 +26,21 @@ export default function SettingsPage() {
   const [selectedGroups, setSelectedGroups] = useState<Record<string, boolean>>({});
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!deleteOpen) return;
+  async function loadDeleteOptions() {
     setDeleteLoading(true);
-    fetch("/api/privacy/delete-options")
-      .then((r) => r.json())
-      .then((data) => {
-        setLinkedGroups(data.groups || []);
-        const defaults: Record<string, boolean> = {};
-        (data.groups || []).forEach((g: LinkedGroup) => {
-          defaults[g.id] = false;
-        });
-        setSelectedGroups(defaults);
-      })
-      .finally(() => setDeleteLoading(false));
-  }, [deleteOpen]);
+    try {
+      const res = await fetch("/api/privacy/delete-options");
+      const data = await res.json();
+      setLinkedGroups(data.groups || []);
+      const defaults: Record<string, boolean> = {};
+      (data.groups || []).forEach((g: LinkedGroup) => {
+        defaults[g.id] = false;
+      });
+      setSelectedGroups(defaults);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
 
   async function handleExport() {
     try {
@@ -122,7 +122,15 @@ export default function SettingsPage() {
                   {t("privacy.deleteWarning")}
                 </p>
               </div>
-              <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+              <Dialog
+                open={deleteOpen}
+                onOpenChange={(open) => {
+                  setDeleteOpen(open);
+                  if (open) {
+                    loadDeleteOptions();
+                  }
+                }}
+              >
                 <DialogTrigger asChild>
                   <Button variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />

@@ -111,15 +111,11 @@ export default function AlertsPage() {
     };
   }, [groupId]);
 
-  useEffect(() => {
-    if (!isAdmin) return;
-    if (!selectedMemberId) {
-      setSelectedPerson("");
-      return;
-    }
-    const alias = persons.find((p) => p.userId === selectedMemberId);
+  function handleMemberChange(memberId: string) {
+    setSelectedMemberId(memberId);
+    const alias = persons.find((p) => p.userId === memberId);
     setSelectedPerson(alias?.id || "");
-  }, [isAdmin, selectedMemberId, persons]);
+  }
 
   async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -195,7 +191,7 @@ export default function AlertsPage() {
               {isAdmin ? (
                 <div className="space-y-2">
                   <Label>{t("alerts.selectMember")}</Label>
-                  <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
+                  <Select value={selectedMemberId} onValueChange={handleMemberChange}>
                     <SelectTrigger>
                       <SelectValue placeholder={t("alerts.selectMember")} />
                     </SelectTrigger>

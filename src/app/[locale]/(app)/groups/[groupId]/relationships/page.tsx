@@ -47,7 +47,6 @@ export default function RelationshipsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [relationError, setRelationError] = useState<string | null>(null);
   const [currentUserPersonId, setCurrentUserPersonId] = useState<string | null>(null);
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -59,7 +58,6 @@ export default function RelationshipsPage() {
       setRelationships(relData.relationships || []);
       setPersons(personData.persons || []);
       setIsAdmin(["admin", "owner"].includes(groupData?.group?.currentUserRole));
-      setCurrentUserId(meData?.user?.id ?? null);
       const linked = (personData.persons || []).find((p: { id: string; userId: string | null }) => p.userId === meData?.user?.id);
       setCurrentUserPersonId(linked?.id ?? null);
       setLoading(false);

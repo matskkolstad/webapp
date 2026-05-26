@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import type { Core, EdgeSingular, NodeSingular } from "cytoscape";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -58,8 +59,7 @@ export default function GraphPage() {
   useEffect(() => {
     if (!containerRef.current || nodes.length === 0) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let cy: any;
+    let cy: Core | null = null;
 
     import("cytoscape").then((cytoscapeModule) => {
       const cytoscape = cytoscapeModule.default;
@@ -135,7 +135,7 @@ export default function GraphPage() {
       cy.layout(layout).run();
       cy.on("layoutstop", () => {
         const seen = new Map<string, number>();
-        cy.nodes().forEach((node: any) => {
+        cy.nodes().forEach((node: NodeSingular) => {
           const pos = node.position();
           const key = `${Math.round(pos.x)}:${Math.round(pos.y)}`;
           const count = seen.get(key) ?? 0;
@@ -148,7 +148,7 @@ export default function GraphPage() {
 
         const minDistance = 160;
         for (let i = 0; i < 3; i += 1) {
-          cy.edges().forEach((edge: any) => {
+          cy.edges().forEach((edge: EdgeSingular) => {
             const source = edge.source();
             const target = edge.target();
             const sp = source.position();

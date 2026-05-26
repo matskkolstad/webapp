@@ -32,7 +32,6 @@ export default function NotificationsPage() {
   const { addToast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
@@ -41,7 +40,6 @@ export default function NotificationsPage() {
       .then((r) => r.json())
       .then((d) => {
         setNotifications(d.notifications || []);
-        setUnreadCount(d.unreadCount || 0);
         setLoading(false);
         if (typeof window !== "undefined") {
           window.dispatchEvent(new CustomEvent("notifications-count", { detail: d.unreadCount || 0 }));
@@ -56,7 +54,6 @@ export default function NotificationsPage() {
       body: JSON.stringify({ markAllRead: true }),
     });
     setNotifications((prev) => prev.map((n) => ({ ...n, readAt: new Date().toISOString() })));
-    setUnreadCount(0);
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("notifications-count", { detail: 0 }));
     }
@@ -70,13 +67,9 @@ export default function NotificationsPage() {
       body: JSON.stringify({ notificationIds: [notificationId] }),
     });
     setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, readAt: new Date().toISOString() } : n)));
-    setUnreadCount((prev) => {
-      const next = Math.max(0, prev - 1);
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("notifications-count", { detail: next }));
-      }
-      return next;
-    });
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("notifications-count"));
+    }
   }
 
   async function openDetails(notification: Notification) {

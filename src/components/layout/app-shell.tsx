@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "@/components/layout/page-transition";
@@ -56,10 +57,12 @@ export function AppShell({ user, children }: AppShellProps) {
     loadUnreadCount();
 
     const handleCountUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<number>;
+      const customEvent = event as CustomEvent<number | undefined>;
       if (typeof customEvent.detail === "number") {
         setUnreadCount(customEvent.detail);
+        return;
       }
+      loadUnreadCount();
     };
 
     window.addEventListener("notifications-count", handleCountUpdate);
@@ -89,7 +92,7 @@ export function AppShell({ user, children }: AppShellProps) {
         <div className="flex h-full flex-col">
           <div className="flex h-16 items-center border-b px-6">
             <Link href="/dashboard" className="flex items-center gap-2">
-              <img src="/logo.svg" alt={t("common.appName")} className="h-7" />
+              <Image src="/logo.svg" alt={t("common.appName")} width={140} height={28} className="h-7 w-auto" />
             </Link>
           </div>
 

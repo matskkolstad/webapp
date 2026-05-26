@@ -27,7 +27,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let { personAId, personBId, eventDate, protectionStatus, notes } = parsed.data;
+    const { eventDate, protectionStatus, notes } = parsed.data;
+    let { personAId, personBId } = parsed.data;
 
     if (personAId === personBId) {
       return NextResponse.json(
