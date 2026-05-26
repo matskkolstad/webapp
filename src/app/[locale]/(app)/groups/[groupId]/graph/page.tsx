@@ -77,7 +77,7 @@ export default function GraphPage() {
         nodeDimensionsIncludeLabels: true,
       } as const;
 
-      cy = cytoscape({
+      const instance = cytoscape({
         container: containerRef.current,
         elements: [
           ...nodes.map((node) => ({ ...node, group: "nodes" as const })),
@@ -130,12 +130,12 @@ export default function GraphPage() {
           },
         ],
         layout,
-      }) as unknown as typeof cy;
+      }) as Core;
 
-      cy.layout(layout).run();
-      cy.on("layoutstop", () => {
+      instance.layout(layout).run();
+      instance.on("layoutstop", () => {
         const seen = new Map<string, number>();
-        cy.nodes().forEach((node: NodeSingular) => {
+        instance.nodes().forEach((node: NodeSingular) => {
           const pos = node.position();
           const key = `${Math.round(pos.x)}:${Math.round(pos.y)}`;
           const count = seen.get(key) ?? 0;
@@ -148,7 +148,7 @@ export default function GraphPage() {
 
         const minDistance = 160;
         for (let i = 0; i < 3; i += 1) {
-          cy.edges().forEach((edge: EdgeSingular) => {
+          instance.edges().forEach((edge: EdgeSingular) => {
             const source = edge.source();
             const target = edge.target();
             const sp = source.position();
@@ -165,12 +165,13 @@ export default function GraphPage() {
             }
           });
         }
-        cy.fit(undefined, 50);
+        instance.fit(undefined, 50);
       });
 
-      cyRef.current = cy;
+      cy = instance;
+      cyRef.current = instance;
       if (typeof window !== "undefined") {
-        (window as Window & { __cy?: unknown }).__cy = cy;
+        (window as Window & { __cy?: unknown }).__cy = instance;
       }
     });
 
