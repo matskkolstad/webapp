@@ -44,7 +44,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
+      - run: npx prisma db push
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/liggnett_test?schema=public
       - run: npm run test
         env:
-          DATABASE_URL: ******localhost:5432/liggnett_test
+          DATABASE_URL: postgresql://test:test@localhost:5432/liggnett_test?schema=public
           JWT_SECRET: test-secret-for-ci
