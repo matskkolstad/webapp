@@ -30,6 +30,10 @@ sudo systemctl status liggnett --no-pager
 - Integration tests: All API endpoints
 - E2E tests: Critical flows (register, login, create group, add relationship, view graph, create alert)
 
+## Release Readiness
+
+See `docs/RELEASE_CHECKLIST.md` for the pre‑prod checklist and sanity steps.
+
 ## Test Structure
 
 ```
